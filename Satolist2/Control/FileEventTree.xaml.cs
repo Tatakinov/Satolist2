@@ -310,6 +310,7 @@ namespace Satolist2.Control
 		public ActionCommand ChangeSerializeStatusCommand { get; }
 		public ActionCommand DeleteFileCommand { get; }
 		public ActionCommand MoveFileCommand { get; }
+		public ActionCommand ChangeFileEncodingCommand { get; }
 
 		public FileEventTreeItemDictionaryViewModel(FileEventTreeViewModel parent, DictionaryModel dictionary)
 		{
@@ -419,6 +420,28 @@ namespace Satolist2.Control
 						//辞書リネーム
 						dictionary.Rename(dialog.FileName);
 					}
+				}
+				);
+
+
+			ChangeFileEncodingCommand = new ActionCommand(
+				o =>
+				{
+					string encodingName = (string)o;
+					var result = MessageBox.Show("辞書の再読み込みを行います。\r\n編集中のデータは失われます。よろしいですか？", "文字コードの変更", MessageBoxButton.YesNo, MessageBoxImage.Question);
+					if (result == MessageBoxResult.Yes)
+					{
+						Dictionary.Encoding = Encoding.GetEncoding(encodingName);
+						//なんかよくわからないけど一度IsSerializedをtrueにしないとDictionary.Bodyが変になる
+						Dictionary.IsSerialized = true;
+						Dictionary.LoadDictionary();
+					}
+				},
+				o =>
+				{
+					//里々辞書のみ文字コードの変更可能
+					//ほかのテキストファイルの文字コードはどこをいじればいいかわからない…
+					return Dictionary.IsSatoriDictionary;
 				}
 				);
 

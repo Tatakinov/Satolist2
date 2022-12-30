@@ -211,7 +211,22 @@ namespace Satolist2.Model
 			//LoadDictionary時と文字化けした場合にメニューから文字コードを指定して読み込みなおすのに使用する
 			set
 			{
-				encoding = value;
+				if (encoding == null || encoding.CodePage != value.CodePage)
+				{
+					//UTF-UnknownはEncodingを生成する際にGetEncoding()を使用している関係で
+					//BOM有りUTF-8としてしかEncodingは取得できない
+					//なので無理矢理BOM無しUTF-8を使用するようにしている
+					//BOM有りUTF-8は使用できなくなるけど使う人はいない…といいな
+					if (value.WebName == Encoding.UTF8.WebName)
+					{
+						encoding = new UTF8Encoding(false);
+					}
+					else
+					{
+						encoding = value;
+					}
+					NotifyChanged();
+				}
 			}
 		}
 

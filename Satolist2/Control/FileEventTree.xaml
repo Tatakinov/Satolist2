@@ -64,6 +64,39 @@
 										<Separator />
 										<MenuItem Header="ファイルを移動・名前変更" Command="{Binding MoveFileCommand}" />
 										<MenuItem Header="ファイルを削除" Command="{Binding DeleteFileCommand}" />
+										<Separator />
+										<MenuItem Header="ファイルの文字コード" >
+											<MenuItem Header="Shift_JIS">
+												<MenuItem.Style>
+													<Style TargetType="MenuItem">
+														<Setter Property="IsCheckable" Value="False" />
+														<Setter Property="IsChecked" Value="False" />
+														<Setter Property="Command" Value="{Binding ChangeFileEncodingCommand}" />
+														<Setter Property="CommandParameter" Value="shift_jis" />
+														<Style.Triggers>
+															<DataTrigger Binding="{Binding Dictionary.Encoding.WebName, Mode=OneWay}" Value="shift_jis">
+																<Setter Property="IsChecked" Value="True" />
+															</DataTrigger>
+														</Style.Triggers>
+													</Style>
+												</MenuItem.Style>
+											</MenuItem>
+											<MenuItem Header="UTF-8">
+												<MenuItem.Style>
+													<Style TargetType="MenuItem">
+														<Setter Property="IsCheckable" Value="False" />
+														<Setter Property="IsChecked" Value="False" />
+														<Setter Property="Command" Value="{Binding ChangeFileEncodingCommand}" />
+														<Setter Property="CommandParameter" Value="utf-8" />
+														<Style.Triggers>
+															<DataTrigger Binding="{Binding Dictionary.Encoding.WebName, Mode=OneWay}" Value="utf-8">
+																<Setter Property="IsChecked" Value="True" />
+															</DataTrigger>
+														</Style.Triggers>
+													</Style>
+												</MenuItem.Style>
+											</MenuItem>
+										</MenuItem>
 									</ContextMenu>
 								</Setter.Value>
 							</Setter>
