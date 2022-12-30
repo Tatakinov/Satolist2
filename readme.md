@@ -53,6 +53,10 @@ https://opensource.org/licenses/mit-license.php
   * MahApps.Metro
   * AngleSharp
 
+* Mozillaパブリックライセンス1.1(MPL1.1/GPL2/LGPL2.1のトリプルライセンス)のパッケージを使用しています
+https://www.mozilla.org/en-US/MPL/1.1/
+  * [UTF Unknown](https://github.com/CharsetDetector/UTF-unknown)
+
 * Apache2.0 ライセンスの素材を使用しています。  
   https://www.apache.org/licenses/LICENSE-2.0
   * https://materialdesignicons.com/
