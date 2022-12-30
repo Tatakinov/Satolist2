@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using UtfUnknown;
 
 
 namespace Satolist2.Model
@@ -123,6 +124,7 @@ namespace Satolist2.Model
 	{
 		private string fullPath;
 		private string body;
+		private Encoding encoding;
 		private bool isChanged;     //変更検出
 		private ObservableCollection<EventModel> events;		//リスト化された辞書の内容一覧
 		private List<EventModel> instantDeserializedEvents;		//リスト化解除されているが、簡易解析された一覧
@@ -202,6 +204,17 @@ namespace Satolist2.Model
 			}
 		}
 
+		//ファイルの文字コード
+		public Encoding Encoding
+		{
+			get => encoding ?? Constants.EncodingShiftJis;
+			//LoadDictionary時と文字化けした場合にメニューから文字コードを指定して読み込みなおすのに使用する
+			set
+			{
+				encoding = value;
+			}
+		}
+
 		public DictionaryModel(GhostModel ghost, string fullPath)
 		{
 			LoadState = EditorLoadState.Initialized;
@@ -209,6 +222,7 @@ namespace Satolist2.Model
 			FullPath = fullPath;
 			isSerialized = true;
 			body = string.Empty;
+			encoding = null;
 			events = new ObservableCollection<EventModel>();
 			OnDelete += DictionaryModel_OnDelete;
 		}
@@ -221,6 +235,7 @@ namespace Satolist2.Model
 			FullPath = null;
 			isSerialized = true;
 			body = string.Empty;
+			encoding = null;
 
 			events = new ObservableCollection<EventModel>();
 			OnDelete += DictionaryModel_OnDelete;
@@ -332,7 +347,19 @@ namespace Satolist2.Model
 		public void LoadDictionary()
 		{
 			//TODO: 辞書単体の設定を考慮する必要
-			var text = File.ReadAllText(FullPath, Constants.EncodingShiftJis);
+			if (encoding == null)
+			{
+				DetectionResult result = CharsetDetector.DetectFromFile(FullPath);
+				IList<DetectionDetail> details = result.Details;
+				//このリストはconfidenceが高い順に並んでいるのでwhereしてfirstを見てやればいいはず。
+				details = details.Where(e => e.EncodingName == "shift-jis" || e.EncodingName == "utf-8").ToList();
+				if (details.Count > 0)
+				{
+					DetectionDetail detail = details.First();
+					Encoding = detail.Encoding;
+				}
+			}
+			var text = File.ReadAllText(FullPath, Encoding);
 			if (!MainViewModel.EditorSettings.GeneralSettings.IsTextModeDefault && IsSatoriDictionary)
 			{
 				//リストモード
@@ -580,7 +607,7 @@ namespace Satolist2.Model
 					//シリアライズして保存
 					saveText = Serialize();
 				}
-				File.WriteAllText(FullPath, saveText, Constants.EncodingShiftJis);
+				File.WriteAllText(FullPath, saveText, Encoding);
 
 				IsChanged = false;
 				return true;
