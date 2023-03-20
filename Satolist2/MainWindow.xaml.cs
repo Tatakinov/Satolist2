@@ -94,6 +94,7 @@ namespace Satolist2
 			Satorite.IsVisible = false;
 			DebugMainMenu.IsVisible = false;
 			UkadocEventReference.IsVisible = false;
+			HelpViewer.IsVisible = false;
 
 			AllowDrop = true;
 			EventEditors = new List<DockingWindow>();
@@ -521,6 +522,7 @@ namespace Satolist2
 			InsertPalette.ViewModel = mainVm.InsertPaletteViewModel;
 			Satorite.ViewModel = mainVm.SatoriteViewModel;
 			UkadocEventReference.ViewModel = mainVm.UkadocEventReferenceViewModel;
+			HelpViewer.ViewModel = mainVm.HelpViewerViewModel;
 		}
 
 		private void ReflectVisibleMenuDataContext()
@@ -545,6 +547,7 @@ namespace Satolist2
 			InsertPaletteVisibleMenu.DataContext = InsertPalette;
 			SatoriteVisibleMenu.DataContext = Satorite;
 			UkadocEventReferenceVisibleMenu.DataContext = UkadocEventReference;
+			HelpViewerVisibleMenu.DataContext = HelpViewer;
 			//
 			
 		}
@@ -566,18 +569,25 @@ namespace Satolist2
 		{
 			var root = DockingManager.Layout.RootPanel;
 			var items = EnumDockingChildren(root);
+			var isVisible = window.IsVisible;
 			if (requestDocumentPane)
 			{
 				LayoutDocumentPane documentPane = (LayoutDocumentPane)items.Last(o => o is LayoutDocumentPane);
 				if(documentPane != null)
 				{
 					documentPane.Children.Add(window);
+
+					//追加時に変更されるので復元する
+					window.IsVisible = isVisible;
+					window.IsActive = false;
 					return;
 				}
 				LayoutAnchorablePane anchorablePane = (LayoutAnchorablePane)items.Last(o => o is LayoutAnchorablePane);
 				if(anchorablePane != null)
 				{
 					anchorablePane.Children.Add(window);
+					window.IsVisible = isVisible;
+					window.IsActive = false;
 					return;
 				}
 			}
@@ -587,12 +597,16 @@ namespace Satolist2
 				if (anchorablePane != null)
 				{
 					anchorablePane.Children.Add(window);
+					window.IsVisible = isVisible;
+					window.IsActive = false;
 					return;
 				}
 				LayoutDocumentPane documentPane = (LayoutDocumentPane)items.Last(o => o is LayoutDocumentPane);
 				if (documentPane != null)
 				{
 					documentPane.Children.Add(window);
+					window.IsVisible = isVisible;
+					window.IsActive = false;
 					return;
 				}
 			}
@@ -687,6 +701,7 @@ namespace Satolist2
 			yield return VariableList;
 			yield return SearchMenu;
 			yield return RecvEventLog;
+			yield return HelpViewer;
 		}
 
 		private void Serializer_LayoutSerializationCallback(object sender, LayoutSerializationCallbackEventArgs e)
@@ -746,6 +761,9 @@ namespace Satolist2
 					break;
 				case ShioriEventReferenceViewModel.ContentId:
 					UkadocEventReference = (DockingWindow)e.Model;
+					break;
+				case HelpViewerViewModel.ContentId:
+					HelpViewer = (DockingWindow)e.Model;
 					break;
 				default:
 					//イベントエディタ等一時的なモノはデシリアライズする必要はない
@@ -848,6 +866,7 @@ namespace Satolist2
 		public InsertPaletteViewModel InsertPaletteViewModel { get; }
 		public SatoriteViewModel SatoriteViewModel { get; }
 		public ShioriEventReferenceViewModel UkadocEventReferenceViewModel { get; }
+		public HelpViewerViewModel HelpViewerViewModel { get; }
 		
 
 		public List<EventEditorViewModel> EventEditors { get; }
@@ -869,6 +888,7 @@ namespace Satolist2
 		public ActionCommand EditTextEditorFontCommand { get; }
 		public ActionCommand OpenSatolistDirectoryCommand { get; }
 		public ActionCommand ReloadShioriCommand { get; }
+		public ActionCommand DumpFMOCommand { get; }
 		public ActionCommand ShowSearchBoxCommand { get; }
 		public ActionCommand ExportNarCommand { get; }
 		public ActionCommand MakeUpdateFileCommand { get; }
@@ -1029,6 +1049,7 @@ namespace Satolist2
 			InsertPaletteViewModel = new InsertPaletteViewModel(this);
 			SatoriteViewModel = new SatoriteViewModel(this);
 			UkadocEventReferenceViewModel = new ShioriEventReferenceViewModel();
+			HelpViewerViewModel = new HelpViewerViewModel();
 
 			SaveFileCommand = new ActionCommand(
 				o => AskSave(false),
@@ -1291,6 +1312,28 @@ namespace Satolist2
 			ReloadShioriCommand = new ActionCommand(
 				o => GhostRuntimeRequest.ReloadShiori(Ghost),
 				o => Ghost != null
+				);
+
+			DumpFMOCommand = new ActionCommand(
+				o =>
+				{
+					SaveFileDialog d = new SaveFileDialog();
+					d.DefaultExt = ".bin";
+					d.Filter = "バイナリ|*.bin";
+					d.FileName = "fmo.bin";
+					if(d.ShowDialog() == true)
+					{
+						try
+						{
+							SakuraFMOReader.DumpToFile(d.FileName);
+							MessageBox.Show("FMOをダンプしました。", "さとりすと", MessageBoxButton.OK, MessageBoxImage.Information);
+						}
+						catch
+						{
+							MessageBox.Show("FMOダンプに失敗しました。", "さとりすと", MessageBoxButton.OK, MessageBoxImage.Warning);
+						}
+					}
+				}
 				);
 
 			ShowSearchBoxCommand = new ActionCommand(

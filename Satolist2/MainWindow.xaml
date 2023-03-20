@@ -77,11 +77,14 @@
 				<MenuItem Header="挿入パレット" x:Name="InsertPaletteVisibleMenu" IsCheckable="True" IsChecked="{Binding IsVisible, Mode=TwoWay}" />
 				<MenuItem Header="さとりて" x:Name="SatoriteVisibleMenu" IsCheckable="True" IsChecked="{Binding IsVisible, Mode=TwoWay}" />
 				<MenuItem Header="Ukadocイベントリファレンス" x:Name="UkadocEventReferenceVisibleMenu" IsCheckable="True" IsChecked="{Binding IsVisible, Mode=TwoWay}" />
+				<MenuItem Header="ヘルプ(試験的)" x:Name="HelpViewerVisibleMenu" IsCheckable="True" IsChecked="{Binding IsVisible, Mode=TwoWay}" />
 				<Separator />
 				<MenuItem Header="ウインドウレイアウトをデフォルトに戻す" Command="{Binding ResetDockingLayoutCommand}" />
 			</MenuItem>
 			<MenuItem Header="デバッグ">
 				<MenuItem Header="起動中のゴーストの辞書をリロード" Command="{Binding ReloadShioriCommand}" InputGestureText="Ctrl+Alt+R" />
+				<Separator />
+				<MenuItem Header="FMOをダンプ" Command="{Binding DumpFMOCommand}" />
 			</MenuItem>
 			<MenuItem Header="更新">
 				<MenuItem Header="narファイル作成" Command="{Binding ExportNarCommand}" />
@@ -173,6 +176,11 @@
 							<!--れしばイベントログ-->
 							<util:DockingWindow x:Name="RecvEventLog">
 								<ctl:RecvEventLog />
+							</util:DockingWindow>
+							
+							<!--ヘルプ-->
+							<util:DockingWindow x:Name="HelpViewer">
+								<ctl:HelpViewer />
 							</util:DockingWindow>
 							
 						</avalonDock:LayoutDocumentPane>
